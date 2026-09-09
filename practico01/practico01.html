@@ -13,15 +13,19 @@
 <body>
 
 <div id="app">
+    <h1>Paso #2 - Información de Perfil Simple (Interpolación)</h1>
     <p>Nombre: {{nombre}}</p>
     <p>Edad: {{edad}} </p>
     <p>Ciudad: {{ciudad}} </p>
 
-
     <p> Hola mi nombre es {{nombre}}, tengo {{edad}} años y vivo en {{ciudad}} </p>
 
+    <hr>
 
-
+    <h1>Paso #3 – Contador Interactivo (Interpolación y Eventos)</h1>
+    <p> Contador: {{contador}}</p>
+    <button @click="contador++">Incrementar</button>
+    <button @click="contador--">Decrementar</button>
 </div>
 
 <script>
@@ -31,8 +35,10 @@
         data: {
             nombre: "Ana García",
             edad: 30,
-            ciudad: "Tupungato"
+            ciudad: "Tupungato",
+            contador: 0
         },
+        
     })
 
 </script>
