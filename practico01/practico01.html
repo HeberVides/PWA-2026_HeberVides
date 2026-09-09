@@ -22,10 +22,30 @@
 
     <hr>
 
-    <h1>Paso #3 – Contador Interactivo (Interpolación y Eventos)</h1>
+    <h1>Paso #3 - Contador Interactivo (Interpolación y Eventos)</h1>
     <p> Contador: {{contador}}</p>
     <button @click="contador++">Incrementar</button>
     <button @click="contador--">Decrementar</button>
+
+    <hr>
+
+    <h1>Paso #4 - Lista de Tareas con Conteo y Estado (Propiedades Computadas, Interpolación, Eventos)</h1>
+
+    <p>Total de Tareas: {{ totalTareas }}</p>
+    <p>Tareas Pendientes: {{ tareasPendientes }}</p>
+
+    <input type="text" v-model="nuevaTarea" placeholder="Escribir tarea a agregar...">
+    <button @click="agregarTarea">Agregar Tarea</button>
+
+    <ul>
+        <li v-for="tarea in tareas" :key="tarea.id"> {{tarea.id}} - Tarea {{tarea.texto}}
+            <span v-if="tarea.completada === false"> - Tarea sin completar </span>
+            <input type="checkbox" v-model="tarea.completada">
+        </li>
+    </ul>
+
+    <hr>
+
 </div>
 
 <script>
@@ -36,8 +56,35 @@
             nombre: "Ana García",
             edad: 30,
             ciudad: "Tupungato",
-            contador: 0
+            contador: 0,
+            nuevaTarea: "",
+            tareas: [
+                    { id: 1, texto: 'Aprender Vue', completada: true},
+                    { id: 2, texto: 'Terminar Punto 4', completada: false},
+                    { id: 3, texto: 'Completar el TPN°1', completada: false}
+                ],
         },
+        methods:{
+            agregarTarea(){
+                if (this.nuevaTarea === '') return;
+                let nuevoId = this.tareas.length +1;
+                this.tareas.push({
+                    id: nuevoId,
+                    texto: this.nuevaTarea,
+                    completada: false
+                });
+
+                this.nuevaTarea = '';
+            }
+        },
+        computed:{
+            totalTareas(){
+                return this.tareas.length
+            },
+            tareasPendientes(){
+                return this.tareas.filter(tarea => tarea.completada === false).length;
+            }
+        }
         
     })
 
