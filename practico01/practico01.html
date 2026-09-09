@@ -54,6 +54,34 @@
         </li>
     </ul>
 
+    <hr>
+
+    <h1>Paso #7 - Uso de las funciones</h1>
+    
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+            <h2>Lista de los 10 primeros Posts</h2>
+            <ul>
+                <li v-for="post in posts" :key="post.id" @click="cargarComentarios(post.id)" style="cursor: pointer; margin-bottom: 5px; color: rgb(239, 96, 252);">
+                    {{ post.id }} - {{ post.title }}
+                </li>
+            </ul>
+        </div>
+
+        <div style="flex: 1;">
+            <h2>Comentarios</h2>
+            <p v-if="comentarios.length === 0" style="color: rgb(51, 143, 135);">
+                clickear en un post del lado izquierdo para ver los comentarios del mismo
+            </p>
+            <ul>
+                <li v-for="comentario in comentarios" :key="comentario.id" style="margin-bottom: 10px;">
+                    <strong>De: {{ comentario.email }}</strong><br>
+                    {{ comentario.body }}
+                </li>
+            </ul>
+        </div>
+    </div>
+    
 </div>
 
 <script>
@@ -76,7 +104,9 @@
             listaeventos: eventosGlobales,
 
             //Se agrega esta variable para evitar bucles de actualizacion luego
-            ignorarUpdate: false
+            ignorarUpdate: false,
+            posts: [],
+            comentarios: [],
         },
         methods:{
             agregarTarea(){
@@ -98,6 +128,9 @@
                 let respuesta = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`);
                 return respuesta.data;
             },
+            async cargarComentarios(postId){
+                this.comentarios = await this.obtenerComments(postId);
+            }
 
         },
         computed:{
@@ -114,7 +147,15 @@
         },
         beforeMount() { this.listaeventos.push({ id: idEvento++, nombre: 'beforeMount', timestamp: Date.now() }); 
         },
-        mounted() { this.listaeventos.push({ id: idEvento++, nombre: 'mounted', timestamp: Date.now() }); 
+        //mounted() { this.listaeventos.push({ id: idEvento++, nombre: 'mounted', timestamp: Date.now() }); 
+        //se va a modificar el hook mounted() por una funcion asincrona
+         async mounted() { 
+            this.listaeventos.push({ id: idEvento++, nombre: 'mounted', timestamp: Date.now() }); 
+            
+            for (let i = 1; i <= 10; i++) {
+                let postObtenido = await this.obtenerPost(i);
+                this.posts.push(postObtenido);
+            }
         },
         beforeUpdate() {
             if (this.ignorarUpdate) return; 
