@@ -7,6 +7,7 @@
     <meta charset="UTF-8">
     <title>Titulo</title>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
 
 </head>
 
@@ -73,7 +74,7 @@
                     { id: 3, texto: 'Completar el TPN°1', completada: false}
                 ],
             listaeventos: eventosGlobales,
-            
+
             //Se agrega esta variable para evitar bucles de actualizacion luego
             ignorarUpdate: false
         },
@@ -88,6 +89,14 @@
                 });
 
                 this.nuevaTarea = '';
+            },
+            async obtenerPost(postId){
+                let respuesta = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}`);
+                return respuesta.data;
+            },
+            async obtenerComments(postId){
+                let respuesta = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`);
+                return respuesta.data;
             },
 
         },
