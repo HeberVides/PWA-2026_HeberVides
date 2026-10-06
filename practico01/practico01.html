@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+    <title>Titulo</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+</head>
+
+<body>
+
+<div id="app">
+    <h1>Paso #2 - Información de Perfil Simple (Interpolación)</h1>
+    <p>Nombre: {{nombre}}</p>
+    <p>Edad: {{edad}} </p>
+    <p>Ciudad: {{ciudad}} </p>
+
+    <p> Hola mi nombre es {{nombre}}, tengo {{edad}} años y vivo en {{ciudad}} </p>
+
+    <hr>
+
+    <h1>Paso #3 - Contador Interactivo (Interpolación y Eventos)</h1>
+    <p> Contador: {{contador}}</p>
+    <button @click="contador++">Incrementar</button>
+    <button @click="contador--">Decrementar</button>
+
+    <hr>
+
+    <h1>Paso #4 - Lista de Tareas con Conteo y Estado (Propiedades Computadas, Interpolación, Eventos)</h1>
+
+    <p>Total de Tareas: {{ totalTareas }}</p>
+    <p>Tareas Pendientes: {{ tareasPendientes }}</p>
+
+    <input type="text" v-model="nuevaTarea" placeholder="Escribir tarea a agregar...">
+    <button @click="agregarTarea">Agregar Tarea</button>
+
+    <ul>
+        <li v-for="tarea in tareas" :key="tarea.id"> {{tarea.id}} - Tarea {{tarea.texto}}
+            <span v-if="tarea.completada === false"> - Tarea sin completar </span>
+            <input type="checkbox" v-model="tarea.completada">
+        </li>
+    </ul>
+
+    <hr>
+
+    <h1>Paso #5 - Lista de eventos</h1>
+    <ul>
+        <li v-for="evento in listaeventos" :key="evento.id"> 
+            ID: {{evento.id}} - Evento: {{evento.nombre}} (Timestamp: {{evento.timestamp}})
+        </li>
+    </ul>
+
+    <hr>
+
+    <h1>Paso #7 - Uso de las funciones</h1>
+    
+    <div style="display: flex; gap: 20px;">
+        <div style="flex: 1;">
+            <h2>Lista de los 10 primeros Posts</h2>
+            <ul>
+                <li v-for="post in posts" :key="post.id" @click="cargarComentarios(post.id)" style="cursor: pointer; margin-bottom: 5px; color: rgb(239, 96, 252);">
+                    {{ post.id }} - {{ post.title }}
+                </li>
+            </ul>
+        </div>
+
+        <div style="flex: 1;">
+            <h2>Comentarios</h2>
+            <p v-if="comentarios.length === 0" style="color: rgb(51, 143, 135);">
+                clickear en un post del lado izquierdo para ver los comentarios del mismo
+            </p>
+            <ul>
+                <li v-for="comentario in comentarios" :key="comentario.id" style="margin-bottom: 10px;">
+                    <strong>De: {{ comentario.email }}</strong><br>
+                    {{ comentario.body }}
+                </li>
+            </ul>
+        </div>
+    </div>
+    
+</div>
+
+<script>
+    let eventosGlobales = [];
+    let idEvento = 1;
+
+    var app = new Vue({
+        el:'#app',
+        data: {
+            nombre: "Ana García",
+            edad: 30,
+            ciudad: "Tupungato",
+            contador: 0,
+            nuevaTarea: "",
+            tareas: [
+                    { id: 1, texto: 'Aprender Vue', completada: true},
+                    { id: 2, texto: 'Terminar Punto 4', completada: false},
+                    { id: 3, texto: 'Completar el TPN°1', completada: false}
+                ],
+            listaeventos: eventosGlobales,
+
+            //Se agrega esta variable para evitar bucles de actualizacion luego
+            ignorarUpdate: false,
+            posts: [],
+            comentarios: [],
+        },
+        methods:{
+            agregarTarea(){
+                if (this.nuevaTarea === '') return;
+                let nuevoId = this.tareas.length +1;
+                this.tareas.push({
+                    id: nuevoId,
+                    texto: this.nuevaTarea,
+                    completada: false
+                });
+
+                this.nuevaTarea = '';
+            },
+            async obtenerPost(postId){
+                let respuesta = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}`);
+                return respuesta.data;
+            },
+            async obtenerComments(postId){
+                let respuesta = await axios.get(`https://jsonplaceholder.typicode.com/posts/${postId}/comments`);
+                return respuesta.data;
+            },
+            async cargarComentarios(postId){
+                this.comentarios = await this.obtenerComments(postId);
+            }
+
+        },
+        computed:{
+            totalTareas(){
+                return this.tareas.length
+            },
+            tareasPendientes(){
+                return this.tareas.filter(tarea => tarea.completada === false).length;
+            }
+        },
+        beforeCreate() { eventosGlobales.push({ id: idEvento++, nombre: 'beforeCreate', timestamp: Date.now() }); 
+        },
+        created() { this.listaeventos.push({ id: idEvento++, nombre: 'created', timestamp: Date.now() }); 
+        },
+        beforeMount() { this.listaeventos.push({ id: idEvento++, nombre: 'beforeMount', timestamp: Date.now() }); 
+        },
+        //mounted() { this.listaeventos.push({ id: idEvento++, nombre: 'mounted', timestamp: Date.now() }); 
+        //se va a modificar el hook mounted() por una funcion asincrona
+         async mounted() { 
+            this.listaeventos.push({ id: idEvento++, nombre: 'mounted', timestamp: Date.now() }); 
+            
+            for (let i = 1; i <= 10; i++) {
+                let postObtenido = await this.obtenerPost(i);
+                this.posts.push(postObtenido);
+            }
+        },
+        beforeUpdate() {
+            if (this.ignorarUpdate) return; 
+            this.listaeventos.push({ id: idEvento++, nombre: 'beforeUpdate', timestamp: Date.now() });
+        },
+        updated() {
+            if (this.ignorarUpdate) {
+                this.ignorarUpdate = false; 
+                return;
+            }     
+            this.listaeventos.push({ id: idEvento++, nombre: 'updated', timestamp: Date.now() });
+            this.ignorarUpdate = true;
+        },
+        beforeDestroy() { this.listaeventos.push({ id: idEvento++, nombre: 'beforeDestroy', timestamp: Date.now() });
+        },
+        destroyed() { this.listaeventos.push({ id: idEvento++, nombre: 'destroyed', timestamp: Date.now() }); 
+        },
+
+
+    })
+
+</script>
+
+</body>
+
+</html>
